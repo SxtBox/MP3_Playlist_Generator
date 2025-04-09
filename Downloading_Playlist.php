@@ -80,6 +80,6 @@ $stream_url = IF_IS_URL ? STREAMING_DIR . str_replace('%2F', '/', rawurlencode($
 // $stream = "#EXTINF:$i,$title\n$stream_url\n"; // WITH NUMERIC ON EXTINF 1 2 3 ETC
 $stream = "#EXTINF:-1,$title\n$stream_url\n";
 echo "$stream\n";
-//header('Content-Disposition: attachment; filename="'.$Playlist_Name.'.m3u"');
+header('Content-Disposition: attachment; filename="'.$Playlist_Name.'.m3u"');
 }
 ?>
