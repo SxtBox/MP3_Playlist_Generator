@@ -1,59 +1,45 @@
 <?php
 
 /*
- M3U Playlist Generator by Folder
- GET Downloading Downloading_Playlist.php
- GET RAW Raw_Playlist.php
+ Mixed Playlist Generators by Folder
+ Filename: Downloading_Playlist.php
+ GET: Downloading_Playlist.php
+ Description: Download as M3U File
  Author: TRC4@USA.COM
+ Created Date: 06 Mar 2020
+ Modified Date: 09 April 2025
 */
 
+error_reporting(0);
+set_time_limit(0);
 date_default_timezone_set("Europe/Tirane");
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// SITE ROOT DIR
-// GET HOST http://localhost/ FOLDER PATH /
+
 if (empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === 'off') {
   $protocol = 'http://';
 } else {
   $protocol = 'https://';
 }
 // Get base URL
-$SITE_ROOT = $protocol . $_SERVER['SERVER_NAME'] . dirname($_SERVER['PHP_SELF']) . "/";
-//echo $SITE_ROOT;
-// GET HOST
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-define("USER_AGENT",  $_SERVER['HTTP_USER_AGENT']); 
-define("ROOT_PATH", dirname($_SERVER["SCRIPT_FILENAME"]) . '/');// C:/DESTINATION PATH
-define("WEBPATH", 'http://' . $_SERVER['SERVER_NAME'] . dirname($_SERVER['PHP_SELF']) . '/'); // FULL HTTP PATH
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//$dirpath = dirname($_SERVER["SCRIPT_FILENAME"]) . '/';
-//$webpath = 'http://' . $_SERVER['SERVER_NAME'] .  dirname($_SERVER['PHP_SELF']) . '/';
-// SITE ROOT DIR
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+$base_URL = $protocol . $_SERVER['SERVER_NAME'] . dirname($_SERVER['PHP_SELF']) . "/";
+//echo $base_URL;
+
 // DATA - VITI - ORA
 $data1 = date("l d/m/Y - H:i:s");
 $data2 = date("l, d F Y - H:i:s");
 $data3 = date("d F Y");
 $viti = date("Y");
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 /* SETTINGS */
-$STREAM_NAME = "Playlist"; // PLAYLIST NAME
-define('MP3_PATH', './Mixed_News/'); // MP3 PATH
-$MUSIC_PATH = "Mixed_News/";    // MP3 PATH
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// ROOT PATH
-define("MP3_MUSIC_PATH", $SITE_ROOT. $MUSIC_PATH);
-//define('MP3_MUSIC_PATH', 'http://' . $_SERVER['SERVER_NAME'] . dirname($_SERVER['PHP_SELF']) . '/MP3/');
+$Playlist_Name = "Playlist"; // PLAYLIST NAME
+define('MP3_PATH', './Streaming_Data/'); // MP3 PATH
+$streams_path = "Streaming_Data/";    // MP3 PATH
+
+define("STREAMING_DIR", $base_URL. $streams_path);
+// add your format here with |extension1|extension2 etc
+define("PLAYLIST_FILE_FORMATS", "/\.(mp3|ogg|flac|m4a|mp4|asx|m3u|m3u8|pls)$/");
+define('IF_IS_URL', preg_match('/:\/\//', STREAMING_DIR));
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// EXAMPLES
-// define('MP3_MUSIC_PATH', /YOUR PATH/);
-// define('MP3_MUSIC_PATH', '/var/www/html/MP3/');
-// define('MP3_MUSIC_PATH', 'http://'.$_SERVER['HTTP_HOST'].'/MP3/'); // LOCALHOST PATH http://localhost/MP3
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-define('PLAYLIST_FILE_FORMATS', '/\.(mp3|ogg|flac|m4a|mp4|asx)$/');
-define('IF_IS_URL', preg_match('/:\/\//', MP3_MUSIC_PATH));
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /* FUNCTIONS */
 function get_files($dir, &$get_files = array()) {
   $handle = opendir($dir);
@@ -79,16 +65,21 @@ foreach ($get_files as $item) {
   if (!preg_match(PLAYLIST_FILE_FORMATS, $item))
     continue;
   ++$i;
-  $TITLE = array_pop(explode('/', $item)); // the title is the last part of the filename
-  $TITLE = preg_replace(PLAYLIST_FILE_FORMATS, '', $TITLE);
 
-  $URL = substr($item, strlen(MP3_PATH) + 1); // take off the top path
-  $URL = IF_IS_URL ? MP3_MUSIC_PATH . str_replace('%2F', '/', rawurlencode($URL)) : MP3_MUSIC_PATH . $URL;
-///////////////////////////////////////////////////////////////////////////////
-//echo "#EXTINF:$i,$TITLE\n$URL\n";
-// $STREAM = "#EXTINF:$i,$TITLE\n$URL\n"; // WITH NUMERIC ON EXTINF 1 2 3 ETC
-$STREAM = "#EXTINF:-1,$TITLE\n$URL\n";
-echo "$STREAM\n";
-header('Content-Disposition: attachment; filename="'.$STREAM_NAME.'.m3u"');
-///////////////////////////////////////////////////////////////////////////////
+//$title = array_pop(explode('/', $item)); // the title is the last part of the filename
+
+$explode = explode('/', $item);
+$title = end($explode);
+
+$title = preg_replace(PLAYLIST_FILE_FORMATS, '', $title);
+
+$stream_url = substr($item, strlen(MP3_PATH) + 1); // TAKE OFF THE TOP PATH
+$stream_url = IF_IS_URL ? STREAMING_DIR . str_replace('%2F', '/', rawurlencode($stream_url)) : STREAMING_DIR . $stream_url;
+// Print Data
+//echo "#EXTINF:$i,$title\n$stream_url\n";
+// $stream = "#EXTINF:$i,$title\n$stream_url\n"; // WITH NUMERIC ON EXTINF 1 2 3 ETC
+$stream = "#EXTINF:-1,$title\n$stream_url\n";
+echo "$stream\n";
+//header('Content-Disposition: attachment; filename="'.$Playlist_Name.'.m3u"');
 }
+?>
